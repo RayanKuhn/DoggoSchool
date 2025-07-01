@@ -1,0 +1,157 @@
+﻿@model List<FilRouge.ViewModels.SessionForDogViewModel>
+
+@{
+    var dog = ViewBag.Dog as FilRouge.Models.Dog;
+    int currentWeek = (int)ViewBag.CurrentWeek;
+    var startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(7 * currentWeek));
+    var endDate = startDate.AddDays(6);
+    var sessionsByDate = Model.GroupBy(s => s.CourseDate).ToDictionary(g => g.Key, g => g.ToList());
+
+    var startHour = 8;
+    var endHour = 18;
+    var joursSemaine = new string[] { "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche" };
+}
+
+<div class="bg-white p-4 rounded shadow-sm">
+    <h4 class="text-center mb-2">Agenda des sessions pour <strong>@dog.Name</strong></h4>
+    <h5 class="text-center mb-4 text-muted">
+        Semaine du @startDate.ToString("dd/MM/yyyy") au @endDate.ToString("dd/MM/yyyy")
+    </h5>
+
+    <table class="table table-bordered text-center align-middle">
+        <thead class="table-light">
+            <tr>
+                <th style="width: 8%;">Heure</th>
+                @for (int i = 0; i < 7; i++)
+                {
+                    var date = startDate.AddDays(i);
+                    var nomJour = char.ToUpper(joursSemaine[(int)date.DayOfWeek == 0 ? 6 : (int)date.DayOfWeek - 1][0]) +
+                    joursSemaine[(int)date.DayOfWeek == 0 ? 6 : (int)date.DayOfWeek - 1].Substring(1);
+                    <th style="width: 13%;">
+                        @nomJour <br />
+                        <small>@date.ToString("dd/MM")</small>
+                    </th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @for (int hour = startHour; hour <= endHour; hour++)
+            {
+                <tr>
+                    <th>@($"{hour:00}:00")</th>
+                    @for (int i = 0; i < 7; i++)
+                    {
+                        var date = startDate.AddDays(i);
+                        var cellSessions = sessionsByDate.ContainsKey(date)
+                        ? sessionsByDate[date].Where(s => s.CourseHour.Hour == hour).ToList()
+                        : new List<FilRouge.ViewModels.SessionForDogViewModel>();
+
+                        <td>
+                            @if (cellSessions.Any())
+                            {
+                                @foreach (var session in cellSessions)
+                                {
+                                    var sessionClass = session.PlacesRemaining == 0
+                                    ? "bg-light text-muted border border-secondary"
+                                    : session.IsRegistered
+                                    ? "bg-success text-white"
+                                    : "bg-white";
+
+                                    <div class="position-relative rounded p-2 mb-2 @sessionClass" style="font-size: 0.85em;">
+                                        <!-- Bouton Info -->
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-dark position-absolute top-0 end-0 m-1 px-2 py-0"
+                                                style="line-height: 1;"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#infoModal-@session.SessionId"
+                                                title="Infos sur la session">
+                                            ?
+                                        </button>
+
+                                        <strong>@session.CourseName</strong><br />
+                                        @session.CourseHour.ToString("HH\\:mm") → @session.CourseEndingTime.ToString("HH\\:mm")<br />
+                                        <small>@session.TeacherName</small><br />
+                                        <small>Places : @session.PlacesRemaining</small>
+
+                                        <div class="d-flex justify-content-center gap-1 mt-2 flex-wrap">
+                                            @if (session.IsRegistered)
+                                            {
+                                                <form asp-action="UnregisterFromSession" asp-controller="Participate" method="post" class="mb-0">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="sessionId" value="@session.SessionId" />
+                                                    <input type="hidden" name="dogId" value="@dog.DogId" />
+                                                    <input type="hidden" name="page" value="@ViewBag.CurrentWeek" />
+                                                    <button type="submit" class="btn btn-danger btn-sm">Se désinscrire</button>
+                                                </form>
+                                            }
+                                            else if (session.PlacesRemaining == 0)
+                                            {
+                                                <button class="btn btn-secondary btn-sm" disabled>Complet</button>
+                                            }
+                                            else
+                                            {
+                                                <form asp-action="RegisterToSession" asp-controller="Participate" method="post" class="mb-0">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="sessionId" value="@session.SessionId" />
+                                                    <input type="hidden" name="dogId" value="@dog.DogId" />
+                                                    <input type="hidden" name="page" value="@ViewBag.CurrentWeek" />
+                                                    <button type="submit" class="btn btn-success btn-sm">S’inscrire</button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <!-- Modal infos -->
+                                    <div class="modal fade" id="infoModal-@session.SessionId" tabindex="-1" aria-labelledby="infoModalLabel-@session.SessionId" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content text-start">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="infoModalLabel-@session.SessionId">Détails du cours</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p><strong>Nom du cours :</strong> @session.CourseName</p>
+                                                    <p><strong>Professeur :</strong> @session.TeacherName</p>
+                                                    <p><strong>Date :</strong> @session.CourseDate.ToString("dd/MM/yyyy")</p>
+                                                    <p><strong>Heure :</strong> @session.CourseHour.ToString("HH\\:mm")</p>
+
+                                                    <hr />
+                                                    <p><strong>Conditions :</strong></p>
+                                                    <ul>
+                                                        <li>Âge : @(session.AgeMin != null ? $"min {session.AgeMin} mois" : "aucune") → @(session.AgeMax != null ? $"max {session.AgeMax} mois" : "aucune")</li>
+                                                        <li>Taille : @(session.HeightMin != null ? $"min {session.HeightMin} cm" : "aucune") → @(session.HeightMax != null ? $"max {session.HeightMax} cm" : "aucune")</li>
+                                                        <li>Poids : @(session.WeightMin != null ? $"min {session.WeightMin} kg" : "aucune") → @(session.WeightMax != null ? $"max {session.WeightMax} kg" : "aucune")</li>
+                                                    </ul>
+
+                                                    <p><strong>Date d'inscription au cours :</strong> @(session.RegistrationDate.ToString("dd/MM/yyyy"))</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <nav>
+        <ul class="pagination justify-content-center">
+            @if (currentWeek > 0)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="#" data-page="@(currentWeek - 1)">← Semaine précédente</a>
+                </li>
+            }
+            <li class="page-item">
+                <a class="page-link" href="#" data-page="@(currentWeek + 1)">Semaine suivante →</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+

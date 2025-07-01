@@ -1,0 +1,70 @@
+﻿@model IEnumerable<FilRouge.Models.Session>
+
+@{
+    ViewData["Title"] = "Sessions du cours";
+    var course = ViewBag.Course as FilRouge.Models.Course;
+}
+
+<style>
+    body {
+        background-color: #fdd29d !important;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="bg-white rounded shadow p-4">
+
+        <h2 class="text-center mb-3">
+            Sessions pour le cours : <strong>@course.Name</strong>
+        </h2>
+        <h5 class="text-center text-muted mb-4">
+            Professeur : @course.Person.FirstName @course.Person.LastName
+        </h5>
+
+        <div class="text-center mb-4">
+            <a asp-action="CreateFromCourse" asp-route-courseId="@course.CourseId" class="btn btn-primary">
+                Créer une session pour ce cours
+            </a>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <p class="text-center text-muted">Aucune session pour ce cours.</p>
+        }
+        else
+        {
+            <table class="table table-bordered table-hover align-middle text-center">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Heure</th>
+                        <th>Places max</th>
+                        <th>Chiens inscrits</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var session in Model)
+                    {
+                        <tr>
+                            <td>@session.CourseDate.ToString("dd/MM/yyyy")</td>
+                            <td>@session.CourseHour.ToString("HH\\:mm")</td>
+                            <td>@session.MembersMax</td>
+                            <td>@session.MembersRegistered</td>
+                            <td class="d-flex justify-content-center gap-1 flex-wrap">
+                                <a asp-action="Edit" asp-route-id="@session.SessionId" class="btn btn-sm btn-warning text-white">
+                                    Modifier
+                                </a>
+                                <form asp-action="Delete" asp-route-id="@session.SessionId" method="post" class="d-inline"
+                                      onsubmit="return confirm('Supprimer cette session ?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

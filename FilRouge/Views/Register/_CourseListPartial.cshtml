@@ -1,0 +1,103 @@
+﻿@model FilRouge.ViewModels.AvailableCoursesForDogViewModel
+
+<div class="bg-white rounded shadow p-4">
+
+    @if (!Model.CompatibleCourses.Any())
+    {
+        <p class="text-muted">Aucun cours compatible pour ce chien.</p>
+    }
+    else
+    {
+        <h3 class="mb-3">Cours compatibles 🐾</h3>
+
+        <table class="table table-hover table-bordered align-middle text-center">
+            <thead class="table-light">
+                <tr>
+                    <th>Nom</th>
+                    <th>Durée</th>
+                    <th>Professeur</th>
+                    <th>Conditions</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var course in Model.CompatibleCourses)
+                {
+                    <tr>
+                        <td>@course.Name</td>
+                        <td>@course.DurationInMinutes min</td>
+                        <td>@course.TeacherName</td>
+                        <td class="text-start">
+                            @if (course.AgeMin.HasValue || course.AgeMax.HasValue)
+                            {
+                                <div>Âge : @(course.AgeMin?.ToString() ?? "Aucun") → @(course.AgeMax?.ToString() ?? "Aucun") mois</div>
+                            }
+                            else
+                            {
+                                <div>Âge : Aucune contrainte</div>
+                            }
+
+                            @if (course.HeightMin.HasValue || course.HeightMax.HasValue)
+                            {
+                                <div>Taille : @(course.HeightMin?.ToString() ?? "Aucune") → @(course.HeightMax?.ToString() ?? "Aucune") cm</div>
+                            }
+                            else
+                            {
+                                <div>Taille : Aucune contrainte</div>
+                            }
+
+                            @if (course.WeightMin.HasValue || course.WeightMax.HasValue)
+                            {
+                                <div>Poids : @(course.WeightMin?.ToString("F1") ?? "Aucun") → @(course.WeightMax?.ToString("F1") ?? "Aucun") kg</div>
+                            }
+                            else
+                            {
+                                <div>Poids : Aucune contrainte</div>
+                            }
+                        </td>
+                        <td>
+                            <form asp-action="RegisterToCourse" method="post">
+                                <input type="hidden" name="dogId" value="@Model.Dog.DogId" />
+                                <input type="hidden" name="courseId" value="@course.CourseId" />
+                                <button type="submit" class="btn btn-success btn-sm">S'inscrire</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <hr class="my-4" />
+
+    <h4 class="mb-3">Mon chien : <strong>@Model.Dog.Name</strong></h4>
+
+    <table class="table table-sm table-striped w-auto text-start">
+        <tbody>
+            <tr>
+                <th>Race</th>
+                <td>@Model.Dog.Breed?.BreedName</td>
+            </tr>
+            <tr>
+                <th>Âge</th>
+                <td>
+                    @{
+                        var today = DateTime.Today;
+                        var ageMonths = (today.Year - Model.Dog.BirthDate.Year) * 12 + today.Month - Model.Dog.BirthDate.Month;
+                    }
+                    @ageMonths mois
+                </td>
+            </tr>
+            <tr>
+                <th>Taille</th>
+                <td>@Model.Dog.Height cm</td>
+            </tr>
+            <tr>
+                <th>Poids</th>
+                <td>@Model.Dog.Weight kg</td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+

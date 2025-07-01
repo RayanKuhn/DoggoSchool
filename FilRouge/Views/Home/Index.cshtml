@@ -1,0 +1,56 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+@{
+    ViewData["Title"] = "Accueil";
+    var userName = User.Identity?.Name;
+}
+
+<style>
+    body {
+        background-color: #fdd29d !important;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="text-center bg-white rounded shadow p-5">
+        <img src="~/images/original-removebg-preview.png" alt="Doggo School Logo" style="max-height: 120px;" class="mb-4" />
+
+        @if (!SignInManager.IsSignedIn(User))
+        {
+            <h1 class="display-5 fw-bold text-dark">Bienvenue sur <span class="text-white bg-dark px-2 py-1 rounded">Doggo School</span> 🐾</h1>
+            <p class="lead text-dark">Inscris-toi pour éduquer ton compagnon avec amour et bonne humeur !</p>
+            <a href="/Identity/Account/Login" class="btn btn-dark btn-lg mt-3 me-2">Se connecter</a>
+            <a href="/Identity/Account/Register" class="btn btn-outline-dark btn-lg mt-3">Créer un compte</a>
+        }
+        else if (User.IsInRole("Admin"))
+        {
+            <h1 class="display-5 fw-bold text-dark">Bienvenue @userName 👑</h1>
+            <p class="lead text-dark">Tu es administrateur. Tu peux valider les cours, gérer les sessions et superviser l’ensemble de la plateforme.</p>
+            <a href="/Courses/Index" class="btn btn-danger btn-lg mt-3 me-2">Valider les cours</a>
+            <a href="/Admin/Index" class="btn btn-outline-danger btn-lg mt-3">Gérer les utilisateurs</a>
+        }
+        else if (User.IsInRole("Teacher"))
+        {
+            <h1 class="display-5 fw-bold text-dark">Bienvenue @userName 👨‍🏫</h1>
+            <p class="lead text-dark">Tu es professeur. Tu peux créer des cours, gérer tes sessions et suivre tes élèves canins 🐕</p>
+            <a href="/Courses/Index" class="btn btn-primary btn-lg mt-3 me-2">Gérer mes cours</a>
+            <a href="/Sessions/Index" class="btn btn-outline-primary btn-lg mt-3">Voir mes sessions</a>
+        }
+        else if (User.IsInRole("User"))
+        {
+            <h1 class="display-5 fw-bold text-dark">Bienvenue @userName 👋</h1>
+            <p class="lead text-dark">Heureux de te revoir ! Tu peux gérer tes chiens et les inscrire à des cours collectifs adaptés 🐶</p>
+            <a href="/Register/Index" class="btn btn-success btn-lg mt-3 me-2">Mes inscriptions</a>
+            <a href="/Participate/AvailableSessionsSelector" class="btn btn-outline-success btn-lg mt-3">Voir les cours disponibles</a>
+        }
+        else
+        {
+            <h1 class="display-5 fw-bold text-dark">Bienvenue @userName 👋</h1>
+            <p class="lead text-dark">Ton rôle n'est pas reconnu. Contacte un administrateur si besoin.</p>
+        }
+    </div>
+</div>
+
+

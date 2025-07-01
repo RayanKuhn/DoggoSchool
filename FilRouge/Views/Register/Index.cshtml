@@ -1,0 +1,71 @@
+﻿@model IEnumerable<FilRouge.ViewModels.RegistrationViewModel>
+
+@{
+    ViewData["Title"] = "Mes inscriptions";
+}
+
+<style>
+    body {
+        background-color: #fdd29d !important;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="bg-white rounded shadow p-4">
+        <h2 class="text-center mb-4">Mes inscriptions à des cours 📚</h2>
+
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info text-center">
+                Vous n'avez encore inscrit aucun chien à un cours.
+            </div>
+
+            <div class="text-center mt-3">
+                <a asp-action="AvailableCourses" asp-controller="Register" class="btn btn-primary">
+                    Voir les cours disponibles
+                </a>
+            </div>
+        }
+        else
+        {
+            <table class="table table-hover table-bordered text-center align-middle mt-3">
+                <thead class="table-light">
+                    <tr>
+                        <th>Chien</th>
+                        <th>Cours</th>
+                        <th>Professeur</th>
+                        <th>Date d'inscription</th>
+                        <th>Statut</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model)
+                    {
+                        <tr>
+                            <td>@r.DogName</td>
+                            <td>@r.CourseName</td>
+                            <td>@r.TeacherName</td>
+                            <td>@r.RegistrationDate.ToString("dd/MM/yyyy")</td>
+                            <td>@r.Status</td>
+                            <td>
+                                <form asp-action="Quit" asp-controller="Register" method="post" onsubmit="return confirm('Se désinscrire de ce cours ?');" class="d-inline">
+                                    <input type="hidden" name="registerId" value="@r.RegisterId" />
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-danger">Se désinscrire</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="text-center mt-4">
+                <a asp-action="AvailableCourses" asp-controller="Register" class="btn btn-outline-primary">
+                    Ajouter une nouvelle inscription
+                </a>
+            </div>
+        }
+    </div>
+</div>
+

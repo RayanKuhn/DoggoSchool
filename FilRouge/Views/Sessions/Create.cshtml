@@ -1,0 +1,79 @@
+﻿@model FilRouge.ViewModels.SessionFormViewModel
+
+@{
+    ViewData["Title"] = "Créer une session";
+    var minDate = DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd");
+}
+
+<style>
+    body {
+        background-color: #fdd29d !important;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="bg-white rounded shadow p-4">
+        <h2 class="text-center mb-4">@ViewData["Title"]</h2>
+
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <form asp-action="@(Model.SessionId.HasValue ? "Edit" : "Create")" method="post">
+                    @if (Model.SessionId.HasValue)
+                    {
+                        <input type="hidden" asp-for="SessionId" />
+                    }
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    @if (ViewBag.CourseLocked == true)
+                    {
+                        <input type="hidden" asp-for="CourseId" />
+                        <div class="form-group mb-3">
+                            <label class="form-label">Cours sélectionné</label>
+                            <input class="form-control" value="@(Model.AvailableCourses.First().Text)" disabled />
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-group mb-3">
+                            <label asp-for="CourseId" class="form-label"></label>
+                            <select asp-for="CourseId" asp-items="Model.AvailableCourses" class="form-select">
+                                <option value="">-- Choisir un cours --</option>
+                            </select>
+                            <span asp-validation-for="CourseId" class="text-danger"></span>
+                        </div>
+                    }
+
+                    <div class="form-group mb-3">
+                        <label asp-for="CourseDate" class="form-label"></label>
+                        <input asp-for="CourseDate" type="date" class="form-control" min="@minDate" />
+                        <span asp-validation-for="CourseDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="CourseHour" class="form-label"></label>
+                        <input asp-for="CourseHour" type="time" class="form-control" min="08:00" max="18:00" />
+                        <span asp-validation-for="CourseHour" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label asp-for="MembersMax" class="form-label"></label>
+                        <input asp-for="MembersMax" type="number" min="1" class="form-control" />
+                        <span asp-validation-for="MembersMax" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">Retour</a>
+                        <input type="submit" value="@(Model.SessionId.HasValue ? "Modifier la session" : "Créer la session")" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

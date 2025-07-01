@@ -1,0 +1,58 @@
+﻿@model FilRouge.Models.Person
+@{
+    ViewData["Title"] = "Mon profil";
+}
+
+<style>
+    body {
+        background-color: #fdd29d;
+    }
+</style>
+
+<div class="container py-5">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5 bg-white rounded">
+                    <h2 class="text-center mb-4">👤 Mes informations personnelles</h2>
+
+                    <div class="mb-4">
+                        <div class="row mb-3">
+                            <div class="col-sm-4 fw-bold">Prénom :</div>
+                            <div class="col-sm-8">@Model.FirstName</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 fw-bold">Nom :</div>
+                            <div class="col-sm-8">@Model.LastName</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 fw-bold">Adresse :</div>
+                            <div class="col-sm-8">@Model.Address</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 fw-bold">Téléphone :</div>
+                            <div class="col-sm-8">@Model.PhoneNumber</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4 fw-bold">Date de naissance :</div>
+                            <div class="col-sm-8">@Model.BirthDate.ToString("dd/MM/yyyy")</div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <a asp-action="MyProfile" class="btn btn-primary px-4">
+                            ✏️ Modifier mes informations
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

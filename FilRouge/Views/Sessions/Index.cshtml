@@ -1,0 +1,63 @@
+﻿@model IEnumerable<FilRouge.Models.Session>
+
+@{
+    ViewData["Title"] = "Liste des sessions";
+}
+
+<style>
+    body {
+        background-color: #fdd29d !important;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="bg-white rounded shadow p-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">@ViewData["Title"] 📅</h2>
+            <a asp-action="Create" class="btn btn-primary">Créer une session</a>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <p class="text-muted">Aucune session pour le moment.</p>
+        }
+        else
+        {
+            <table class="table table-hover table-bordered align-middle text-center">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nom du cours</th>
+                        <th>Date</th>
+                        <th>Heure</th>
+                        <th>Places max</th>
+                        <th>Chiens inscrits</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var session in Model)
+                    {
+                        <tr>
+                            <td>@session.Course?.Name</td>
+                            <td>@session.CourseDate.ToString("dd/MM/yyyy")</td>
+                            <td>@session.CourseHour.ToString("HH\\:mm")</td>
+                            <td>@session.MembersMax</td>
+                            <td>@session.MembersRegistered</td>
+                            <td class="d-flex justify-content-center flex-wrap gap-1">
+                                <a asp-action="Edit" asp-route-id="@session.SessionId" class="btn btn-sm btn-warning text-white">Modifier</a>
+
+                                <form asp-action="Delete" asp-route-id="@session.SessionId" method="post" class="d-inline"
+                                      onsubmit="return confirm('Supprimer cette session ?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+

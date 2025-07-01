@@ -1,0 +1,53 @@
+﻿@model IEnumerable<FilRouge.Models.Dog>
+
+@{
+    ViewData["Title"] = "Cours disponibles";
+}
+
+<style>
+    body {
+        background-color: #fdd29d !important;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="bg-white rounded shadow p-4">
+        <h2 class="text-center mb-4">Cours disponibles pour votre chien 🐕</h2>
+
+        <div class="mb-4">
+            <label for="dogSelect" class="form-label fw-semibold">Choisissez un chien :</label>
+            <select id="dogSelect" class="form-select">
+                <option disabled selected value="">-- Sélectionnez un chien --</option>
+                @foreach (var dog in Model)
+                {
+                    <option value="@dog.DogId">@dog.Name</option>
+                }
+            </select>
+        </div>
+
+        <div id="coursesContainer">
+            <!-- Les cours apparaîtront ici -->
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("dogSelect").addEventListener("change", function () {
+            const dogId = this.value;
+            fetch(`/Register/GetCoursesForDog?dogId=${dogId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Erreur de chargement");
+                    return response.text();
+                })
+                .then(html => {
+                    document.getElementById("coursesContainer").innerHTML = html;
+                })
+                .catch(err => {
+                    document.getElementById("coursesContainer").innerHTML = "<p class='text-danger'>Erreur de chargement des cours.</p>";
+                    console.error(err);
+                });
+        });
+    </script>
+}
+

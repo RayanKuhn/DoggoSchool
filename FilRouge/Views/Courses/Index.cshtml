@@ -1,0 +1,104 @@
+﻿@model IEnumerable<FilRouge.Models.Course>
+
+@{
+    ViewData["Title"] = "Liste des cours";
+}
+
+<style>
+    body {
+        background-color: #fdd29d !important;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="bg-white rounded shadow p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">@ViewData["Title"]</h2>
+            <a asp-action="Create" class="btn btn-primary">Créer un nouveau cours</a>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <p class="text-muted">Aucun cours n'a encore été créé.</p>
+        }
+        else
+        {
+            <table class="table table-hover table-bordered text-center align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nom</th>
+                        <th>Durée (min)</th>
+                        <th>Tranche d’âge</th>
+                        <th>Taille (cm)</th>
+                        <th>Poids (kg)</th>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <th>Professeur</th>
+                        }
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var course in Model)
+                    {
+                        var isPending = !course.IsValidatedByAdmin;
+                        var rowClass = isPending ? "table-secondary" : "";
+
+                        <tr class="@rowClass">
+                            <td>@course.Name</td>
+                            <td>@course.DurationInMinutes</td>
+                            <td>
+                                @(course.AgeMin != null ? $"{course.AgeMin}" : "-") - @(course.AgeMax != null ? $"{course.AgeMax}" : "-") mois
+                            </td>
+                            <td>
+                                @(course.HeightMin != null ? $"{course.HeightMin}" : "-") - @(course.HeightMax != null ? $"{course.HeightMax}" : "-") cm
+                            </td>
+                            <td>
+                                @(course.WeightMin != null ? $"{course.WeightMin}" : "-") - @(course.WeightMax != null ? $"{course.WeightMax}" : "-") kg
+                            </td>
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <td>@course.Person?.FirstName @course.Person?.LastName</td>
+                            }
+
+                            <td>
+                                @if (isPending)
+                                {
+                                    <span class="badge bg-warning text-dark">En attente</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Validé</span>
+                                }
+                            </td>
+
+                            <td class="d-flex flex-wrap gap-1 justify-content-center">
+                                <a asp-controller="Sessions" asp-action="ByCourse" asp-route-courseId="@course.CourseId" class="btn btn-sm btn-outline-info">
+                                    Sessions
+                                </a>
+
+                                @if (User.IsInRole("Admin") && !course.IsValidatedByAdmin)
+                                {
+                                    <form asp-action="Validate" asp-route-id="@course.CourseId" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-success">Valider</button>
+                                    </form>
+                                }
+
+                                <a asp-action="Edit" asp-route-id="@course.CourseId" class="btn btn-sm btn-warning text-white">Modifier</a>
+
+                                <form asp-action="Delete" asp-route-id="@course.CourseId" method="post" class="d-inline"
+                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce cours ?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

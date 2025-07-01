@@ -1,0 +1,63 @@
+﻿@model IEnumerable<FilRouge.Models.Dog>
+
+@{
+    ViewData["Title"] = "Mes chiens";
+}
+
+<style>
+    body {
+        background-color: #fdd29d !important;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="bg-white rounded shadow p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">@ViewData["Title"] 🐾</h2>
+            <a asp-action="Create" class="btn btn-success">Ajouter un chien</a>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <p class="text-muted">Tu n'as pas encore ajouté de chien. Clique sur "Ajouter un chien" pour commencer 🐶</p>
+        }
+        else
+        {
+            <table class="table table-hover table-bordered text-center align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nom</th>
+                        <th>Date de naissance</th>
+                        <th>Taille (cm)</th>
+                        <th>Poids (kg)</th>
+                        <th>Problèmes de santé</th>
+                        <th>Race</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var dog in Model)
+                    {
+                        <tr>
+                            <td>@dog.Name</td>
+                            <td>@dog.BirthDate.ToString("dd/MM/yyyy")</td>
+                            <td>@dog.Height</td>
+                            <td>@dog.Weight</td>
+                            <td>@(string.IsNullOrWhiteSpace(dog.HealthIssues) ? "Aucun" : dog.HealthIssues)</td>
+                            <td>@dog.Breed.BreedName</td>
+                            <td class="d-flex flex-wrap gap-1 justify-content-center">
+                                <a asp-action="Edit" asp-route-id="@dog.DogId" class="btn btn-sm btn-warning text-white">Modifier</a>
+                                <form asp-action="Delete" asp-route-id="@dog.DogId" method="post" class="d-inline"
+                                      onsubmit="return confirm('Supprimer ce chien ?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+

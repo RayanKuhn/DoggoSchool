@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "Agenda des sessions";
+}
+
+<style>
+    body {
+        background-color: #fdd29d !important;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="bg-white rounded shadow p-4">
+        <h2 class="text-center mb-4">Sessions disponibles 🗓️</h2>
+
+        <div class="mb-4">
+            <label for="dogSelect" class="form-label fw-semibold">Choisissez un chien :</label>
+            @Html.DropDownList(
+                     "dogId",                          // Name utilisé dans la query string
+                     ViewBag.DogList as SelectList,   // Liste injectée depuis le controller
+                     "-- Sélectionnez un chien --",   // Texte par défaut
+                     new { @class = "form-select", id = "dogSelect" } // ⚠️ ID crucial pour le JS
+                     )
+        </div>
+
+        <hr />
+
+        <div id="sessionContainer">
+            @* Les sessions seront chargées ici dynamiquement *@
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function loadSessions(dogId, page = 0) {
+            if (!dogId) {
+                $('#sessionContainer').html('');
+                return;
+            }
+
+            $.get('/Participate/GetSessionsForDog', { dogId: dogId, page: page })
+                .done(function (data) {
+                    $('#sessionContainer').html(data);
+                });
+        }
+
+        $(document).ready(function () {
+            const selectedDogId = $('#dogSelect').val();
+            const initialPage = parseInt('@ViewBag.Page') || 0;
+
+            if (selectedDogId) {
+                loadSessions(selectedDogId, initialPage);
+            }
+
+            $('#dogSelect').on('change', function () {
+                const dogId = $(this).val();
+                loadSessions(dogId, 0); // on remet la pagination à 0 si on change de chien
+            });
+
+            // Pagination dynamique
+            $('#sessionContainer').on('click', '.pagination a', function (e) {
+                e.preventDefault();
+                const page = $(this).data('page');
+                const dogId = $('#dogSelect').val();
+                loadSessions(dogId, page);
+            });
+        });
+    </script>
+}
+
+
+
+
